@@ -1,73 +1,63 @@
-### FlexOffer Agent (FOA)
+# FlexOffer Agent (FOA)
 
-The FlexOffer Agent (FOA) is a is an extensible and highly customizable software component of the Flexibility Modeling, Management, and Trading System that is responsible for the generation and execution of FOs for one or multiple flexible loads (both production and consumption). It forms individual flexoffers, delivers the individual flexoffers to the aggregator software (FMAN), receives disaggregated schedules from the FMAN, and activates the flexible loads according to the received schedules. This open-source version of the FOA software was developed by researchers at the Daisy group, Department of Computer Science, Aalborg University, Denmark. Its performance has been successfully demonstrated in Cyprus, Germany, and Switzerland during the H2020 GOFLEX project (https://goflex-project.eu).
+The FlexOffer Agent (FOA) is an extensible and highly customizable software component of the Flexibility Modeling, Management, and Trading System. It is responsible for the generation and execution of FlexOffers for one or multiple flexible loads (both production and consumption). The FOA forms individual FlexOffers, delivers them to the aggregator software (FMAN), receives disaggregated schedules from the FMAN, and activates the flexible loads according to the received schedules.
 
+This open source version of the FOA software was developed by researchers at the DAISY group, Department of Computer Science, Aalborg University, Denmark. Its performance has been successfully demonstrated in Cyprus, Germany, and Switzerland during the H2020 GOFLEX project (https://goflex-project.eu).
 
+## Publications
 
+If you use this software in your research, please cite:
 
-### Installation using docker
+- B. Neupane, L. Siksnys, T. B. Pedersen, R. Hagensby, M. Aftab, B. Eck, et al., "GOFLEX: Extracting, Aggregating and Trading Flexibility Based on FlexOffers for 500+ Prosumers in 3 European Cities," *Proceedings of the Thirteenth ACM International Conference on Future Energy Systems (e-Energy '22)*, pp. 361--373, 2022. [DOI](https://dl.acm.org/doi/abs/10.1145/3538637.3538865)
 
-It's very easy to setup and run the app with docker. All you need to do is build a docker image, then either run it in a container locally or push the image to a remote server and run it there. You must install `docker` and `docker-compose` both locally and on remote server if not installed already. 
+- L. Siksnys, T. B. Pedersen, M. N. Aftab, and B. Neupane, "Flexibility Modeling, Management, and Trading in Bottom-up Cellular Energy Systems," *Proceedings of the Tenth ACM International Conference on Future Energy Systems (e-Energy '19)*, pp. 335--346, 2019. [DOI](https://dl.acm.org/doi/abs/10.1145/3307772.3328296)
 
-* Install Docker on [Ubuntu 16](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-16-04) or [Ubuntu 18](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-18-04)
+- L. Siksnys, T. B. Pedersen, and B. Neupane, "Modeling and Managing Energy Flexibility Using FlexOffers," *IEEE International Conference on Communications, Control, and Computing Technologies for Smart Grids (SmartGridComm)*, pp. 1--7, 2018. [DOI](https://ieeexplore.ieee.org/abstract/document/8587605)
 
-* Install Docker Compose
+## Installation using Docker
 
-  ```bash
-  sudo curl -L "https://github.com/docker/compose/releases/download/1.23.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-  sudo chmod +x /usr/local/bin/docker-compose
-  docker-compose --version
-  ```````
+It is easy to set up and run the app with Docker. All you need to do is build a Docker image, then either run it in a container locally or push the image to a remote server and run it there. You must install `docker` and `docker-compose` both locally and on the remote server.
 
-#### Build Project
-
+### Build Project
 ```bash
 mvn clean install -DskipTests
 ```
 
-#### Build docker image
-
+### Build Docker Image
 ```bash
 docker-compose build
 ```
 
-#### Push docker image to remote private docker registry
-
+### Push Docker Image to Remote Private Docker Registry
 ```bash
 # one-time login to private docker registry
-docker login repo.treescale.com # it will ask for username and password
+docker login repo.treescale.com
 
 docker-compose push
 ```
 
-#### On remote server, pull and run docker image from private registry
-
+### On Remote Server, Pull and Run Docker Image
 ```bash
 # copy docker-compose.yml to remote server
 scp docker-compose.yml <username>@<remote-server-address>:/remote/dir/path
 
-# login to remote server and navigate to the directory containing docker-compose.yml
+# login to remote server
 ssh <username>@<remote-server-address>
 cd /remote/dir/path
 
 # one-time login to private docker registry
-docker login repo.treescale.com # you will need to install docker if not installed already
-docker-compose pull # you will need to install docker-compose if not installed already
-
-# launch a container (you must be inside the directory containing docker-compose.yml)
-docker-compose -d up
+docker login repo.treescale.com
+docker-compose pull
+docker-compose up -d
 ```
 
-Alternatively, you can perform one-time login to the private docker registry on the remote server as shown above, then
-directly deploy container from your local machine as follows:
+Alternatively, deploy directly from your local machine:
 ```bash
-# Note: you must be logged in to the private docker registry to run these commands
-cat docker-compose | ssh <username>@<remote-server-address> "docker-compose -f - pull"
-cat docker-compose | ssh <username>@<remote-server-address> "docker-compose -f - up -d"
+cat docker-compose.yml | ssh <username>@<remote-server-address> "docker-compose -f - pull"
+cat docker-compose.yml | ssh <username>@<remote-server-address> "docker-compose -f - up -d"
 ```
 
-#### Connect/Disconnect to/from a container
-
+### Connect/Disconnect to a Container
 ```bash
 # attach to a running container
 docker attach <container-name>
@@ -76,30 +66,17 @@ docker attach <container-name>
 CTRL-p, CTRL-q
 ```
 
-After the container is up and running, the services can be accessed on ports configured in `docker-compose.yml`
-
-#### Redeployment after changing/updating code
-When you make changes to your app code, remember to rebuild your image and recreate your appâ€™s containers.
-To redeploy a service, use the following command the following commands.
-The first rebuilds the image for the service and then stop, destroy, and recreate just the web service.
-The --no-deps flag prevents `docker-compose` from also recreating any services which this service depends on.
-
-```
+### Redeployment After Code Changes
+```bash
 docker-compose build --pull <service-name>
 docker-compose up --no-deps -d <service-name>
 ```
 
-#### Remove unnecessary docker images
-
+### Remove Unnecessary Docker Images
 ```bash
-# locally
 docker system prune -f
-
-# from remote server
-ssh <username>@<remote-server-address> "docker system prune -f"
 ```
 
-
-### Acknowledgments
+## Acknowledgments
 
 The project Generalized Operational FLEXibility for Integrating Renewables in the Distribution Grid (GOFLEX) has received funding from the European Union's Horizon 2020 research and innovation programme under grant agreement No 731232.
